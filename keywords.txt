@@ -1,0 +1,25 @@
+###########################################
+# Syntax Coloring Map For DHT-sensor-library
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+Station			KEYWORD1
+ArduinoWind			KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+
+send_data 			KEYWORD2
+set_wind_avg 		KEYWORD2
+set_wind_max 		KEYWORD2
+set_wind_min 		KEYWORD2
+set_wind_dir 		KEYWORD2
+set_temp 			KEYWORD2
+set_rh 			KEYWORD2
+set_msclp 			KEYWORD2
+set_precip 			KEYWORD2
+set_precip_interval 	KEYWORD2
