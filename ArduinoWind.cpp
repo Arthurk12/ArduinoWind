@@ -1,13 +1,12 @@
 #include "ArduinoWind.h"
 
+extern HttpClient http;
 
-Station::Station(char* uid, char* passphrase, int interval_in_seconds){
+Station::Station(char* uid, char* passphrase, int interval_in_seconds) : http(c){
     this->uid = uid;
     this->passphrase = passphrase;
     this->interval_in_seconds = interval_in_seconds;
     randomSeed(analogRead(0));
-    c = new EthernetClient();
-    http = new HttpClient(*c);
     resetAll();
 }
 
@@ -17,52 +16,60 @@ bool Station::send_data(){
     int err =0;
     bool ret;
 
-    err = this->http->get(fixed_url, url_with_variables.c_str());
+    err = http.get(fixed_url, url_with_variables.c_str());
     if (err == 0){
         Serial.println("startedRequest ok");
-
-        err = this->http->responseStatusCode();
+        err = http.responseStatusCode();
         if (err ==200){
             ret = 1;
         }else{    
             ret =  0;
-            Serial.println(strcat(fixed_url,url_with_variables.c_str()));
         }
     }else{
         Serial.print("Connect failed: ");
         Serial.println(err);
         ret = 0;
     }
-    this->http->stop();
+	  Serial.print(fixed_url);
+	  Serial.println(url_with_variables.c_str());
+    http.stop();
     return ret;
 }
 
-char* Station::generate_hash(){
+String Station::generate_hash(String salt){
     String temp;
-    
-    String salt = String(random(233, 10009));
+
     temp.concat(salt);
     temp.concat(this->uid);
     temp.concat(this->passphrase);
+
 
     //generate the MD5 hash for our string
     unsigned char* hash=MD5::make_hash(temp.c_str());
     //generate the digest (hex encoding) of our hash
     char *md5str = MD5::make_digest(hash, 16);
     
-    this->salt = salt.c_str(); 
+    String md5 = String(md5str);
+
     free(hash);
-    return md5str;
+    free(md5str);
+
+    return md5;
 }
 
 String Station::generate_url(){
     String url;
+    String salt = String(random(233, 10009));
+
     url.concat("/upload/api.php?uid=");
     url.concat(this->uid);
     url.concat("&salt=");
-    url.concat(this->salt);
+    url.concat(salt.c_str());
     url.concat("&hash=");
-    url.concat(generate_hash());
+    url.concat(generate_hash(salt));
+	Serial.print("O SALT É: ");
+	Serial.print(salt);
+	Serial.println("      ");
     url.concat("&interval=");
     url.concat(this->interval_in_seconds);
     if(this->wind_avg!=no_info){
@@ -78,11 +85,11 @@ String Station::generate_url(){
         url.concat(this->wind_min);
     }
     if(this->wind_dir!=no_info){
-        url.concat("&wind_dir=");
+        url.concat("&wind_direction=");
         url.concat(this->wind_dir);
     }
     if(this->temp!=no_info){
-        url.concat("&temp=");
+        url.concat("&&temperature=");
         url.concat(this->temp);
     }
     if(this->rh!=no_info){

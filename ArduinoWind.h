@@ -15,8 +15,10 @@
 
 
 #include "MD5.h"
-#include <EthernetClient.h>
+#include <SPI.h>
 #include <HttpClient.h>
+#include <Ethernet.h>
+#include <EthernetClient.h>
 
 #define fixed_url "www.windguru.cz"
 #define no_info -49
@@ -26,7 +28,6 @@ class Station{
     private:
         char* uid;
         char* passphrase;
-        char* salt;
         int interval_in_seconds = 60;
         //sensor data
         float wind_avg=no_info;
@@ -38,13 +39,12 @@ class Station{
         float msclp=no_info;
         float precip=no_info;
         float precip_interval=no_info;
+	  
+	  EthernetClient c;
+	  HttpClient http;
 
-        EthernetClient *c;
-        HttpClient *http;
-
-        
         String generate_url();
-        char* generate_hash();
+        String generate_hash(String salt);
         void resetAll();
         
   
