@@ -41,6 +41,9 @@ class Station{
         float msclp=no_info;
         float precip=no_info;
         float precip_interval=no_info;
+
+		int wind_measures=0;
+		float wind_velocity_acumulator=0;
 	  
 	  	EthernetClient c;
 	  	HttpClient http;

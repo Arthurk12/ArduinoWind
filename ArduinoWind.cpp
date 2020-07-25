@@ -70,7 +70,7 @@ String Station::generate_hash(String salt){
 }
 
 String Station::generate_url(){
-    String url;
+	String url;
     String salt = String(random(233, 10009));
 
     url.concat("/upload/api.php?uid=");
@@ -125,6 +125,9 @@ String Station::generate_url(){
 }
 
 void Station::set_wind_velocity(float val){
+	this->wind_measures++;
+	this->wind_velocity_acumulator+=val;
+	set_wind_avg(wind_velocity_acumulator/wind_measures);
 
 	if(val > get_wind_max()){
 		set_wind_max(val);	
@@ -133,13 +136,7 @@ void Station::set_wind_velocity(float val){
 	if(val < get_wind_min()){
 		set_wind_min(val);	
 	}
-
-	if(get_wind_avg() == no_info){
-		set_wind_avg(val);	
-	}else{
-		float average = (get_wind_avg() + val) /2;
-		set_wind_avg(average);	
-	}
+	
 }
 
 void Station::set_wind_avg(float val){
@@ -215,6 +212,8 @@ float Station::get_precip_interval(){
 }
 
 void Station::resetAll(){
+	this->wind_measures=0;
+	this->wind_velocity_acumulator=0;
 	this->wind_avg=no_info;
     this->wind_max=MAX_CTE;
     this->wind_min=MIN_CTE;
