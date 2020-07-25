@@ -1,3 +1,14 @@
+/*  <------------------------------------------>
+    Library made to facilitate DIY arduino based
+    weather stations to send data to windguru.cz.
+    Libraries dependencies:
+        - MD5
+        - EthernetClient
+        - HttpClient
+    <------------------------------------------>
+        Author: Arthur B. Grossi
+*/
+
 #include "ArduinoWind.h"
 
 extern HttpClient http;
@@ -11,7 +22,7 @@ Station::Station(char* uid, char* passphrase, int interval_in_seconds) : http(c)
 }
 
 bool Station::send_data(){
-    String url_with_variables = generate_url();
+	String url_with_variables = generate_url();
 
     int err =0;
     bool ret;
@@ -26,13 +37,14 @@ bool Station::send_data(){
             ret =  0;
         }
     }else{
-        Serial.print("Connect failed: ");
+        Serial.print("failed to connect: ");
         Serial.println(err);
         ret = 0;
     }
-	  Serial.print(fixed_url);
-	  Serial.println(url_with_variables.c_str());
+  	Serial.print(fixed_url);
+  	Serial.println(url_with_variables.c_str());
     http.stop();
+
     return ret;
 }
 
@@ -76,11 +88,11 @@ String Station::generate_url(){
         url.concat("&wind_avg=");
         url.concat(this->wind_avg);
     }
-    if(this->wind_max!=no_info){
+    if(this->wind_max!=MAX_CTE){
         url.concat("&wind_max=");
         url.concat(this->wind_max);
     }
-    if(this->wind_min!=no_info){
+    if(this->wind_min!=MIN_CTE){
         url.concat("&wind_min=");
         url.concat(this->wind_min);
     }
@@ -110,6 +122,24 @@ String Station::generate_url(){
     }
     resetAll();
     return url;
+}
+
+void Station::set_wind_velocity(float val){
+
+	if(val > get_wind_max()){
+		set_wind_max(val);	
+	}
+	
+	if(val < get_wind_min()){
+		set_wind_min(val);	
+	}
+
+	if(get_wind_avg() == no_info){
+		set_wind_avg(val);	
+	}else{
+		float average = (get_wind_avg() + val) /2;
+		set_wind_avg(average);	
+	}
 }
 
 void Station::set_wind_avg(float val){
@@ -185,9 +215,9 @@ float Station::get_precip_interval(){
 }
 
 void Station::resetAll(){
-    this->wind_avg=no_info;
-    this->wind_max=no_info;
-    this->wind_min=no_info;
+	this->wind_avg=no_info;
+    this->wind_max=MAX_CTE;
+    this->wind_min=MIN_CTE;
     this->wind_dir=no_info;
     this->temp=no_info;
     this->rh=no_info;
